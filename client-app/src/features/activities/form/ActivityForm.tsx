@@ -6,12 +6,14 @@ interface IProps {
   activity: IActivity | null;
   cancelClicked: () => void;
   handleSubmit: (activity: IActivity) => void;
+  submitting: boolean;
 }
 
 export const ActivityForm: React.FC<IProps> = ({
   activity: initialActivity,
   cancelClicked,
   handleSubmit,
+  submitting,
 }) => {
   const initForm = () => {
     if (initialActivity) {
@@ -32,7 +34,6 @@ export const ActivityForm: React.FC<IProps> = ({
   const [activity, setActivity] = useState<IActivity>(initForm);
 
   const submit = () => {
-    console.log(activity);
     handleSubmit(activity);
   };
 
@@ -84,7 +85,13 @@ export const ActivityForm: React.FC<IProps> = ({
           name="venue"
           onChange={handleInputChange}
         />
-        <Button floated="right" positive type="submit" content="Submit" />
+        <Button
+          loading={submitting}
+          floated="right"
+          positive
+          type="submit"
+          content="Submit"
+        />
         <Button
           onClick={cancelClicked}
           floated="right"

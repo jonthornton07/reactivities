@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, SyntheticEvent } from "react";
 import { Grid } from "semantic-ui-react";
 import { IActivity } from "../../../app/models/activity";
-import axios from "axios";
 import ActivityList from "./ActivityList";
 import ActivityDetails from "./ActivityDetails";
 import { ActivityForm } from "../form/ActivityForm";
 import { v4 as uuid } from "uuid";
+import agent from "../../../app/api/agent";
+import { LoadingComponent } from "../../../app/layout/LoadingComponent";
 
 interface IProps {
   creatingActivity: boolean;
@@ -21,6 +22,9 @@ export const ActivityDashboard: React.FC<IProps> = ({
     null
   );
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState("");
 
   const didSelectActivity = (id: string) => {
     activityCreationCancelled();
@@ -35,24 +39,32 @@ export const ActivityDashboard: React.FC<IProps> = ({
   };
 
   const createActivity = (activity: IActivity) => {
-    setActivities([
-      ...activities,
-      {
-        ...activity,
-        id: uuid(),
-      },
-    ]);
-    setSelectedActivity(activity);
-    activityCreationCancelled();
+    setSubmitting(true);
+    const newActivity = {
+      ...activity,
+      id: uuid(),
+    };
+    agent.Activities.create(newActivity)
+      .then(() => {
+        setActivities([...activities, newActivity]);
+        setSelectedActivity(newActivity);
+        activityCreationCancelled();
+      })
+      .then(() => setSubmitting(false));
   };
 
   const editActivity = (activity: IActivity) => {
-    setActivities([
-      ...activities.filter((a) => a.id !== activity.id),
-      activity,
-    ]);
-    setSelectedActivity(activity);
-    setEditMode(false);
+    setSubmitting(true);
+    agent.Activities.update(activity)
+      .then(() => {
+        setActivities([
+          ...activities.filter((a) => a.id !== activity.id),
+          activity,
+        ]);
+        setSelectedActivity(activity);
+        setEditMode(false);
+      })
+      .then(() => setSubmitting(false));
   };
 
   const handleSubmit = (activity: IActivity) => {
@@ -63,22 +75,32 @@ export const ActivityDashboard: React.FC<IProps> = ({
     }
   };
 
-  const handleDelete = (id: string) => {
-    setActivities([...activities.filter((a) => a.id !== id)]);
+  const handleDelete = (
+    event: SyntheticEvent<HTMLButtonElement>,
+    id: string
+  ) => {
+    setDeleting(event.currentTarget.name);
+    agent.Activities.delete(id)
+      .then(() => {
+        setActivities([...activities.filter((a) => a.id !== id)]);
+      })
+      .then(() => setDeleting(""));
   };
 
   useEffect(() => {
-    axios
-      .get<IActivity[]>("http://localhost:5000/api/activities")
+    agent.Activities.list()
       .then((res) => {
         let activities: IActivity[] = [];
-        res.data.forEach((activity) => {
+        res.forEach((activity) => {
           activity.date = activity.date.split(".")[0];
           activities.push(activity);
         });
         setActivities(activities);
-      });
+      })
+      .then(() => setLoading(false));
   }, []);
+
+  if (loading) return <LoadingComponent content="Loading Activities..." />;
 
   return (
     <Grid>
@@ -87,6 +109,7 @@ export const ActivityDashboard: React.FC<IProps> = ({
           activities={activities}
           didSelectActivity={didSelectActivity}
           didSelectDelete={handleDelete}
+          deletingName={deleting}
         />
       </Grid.Column>
       <Grid.Column width={6}>
@@ -106,6 +129,7 @@ export const ActivityDashboard: React.FC<IProps> = ({
             activity={creatingActivity ? null : selectedActivity}
             cancelClicked={cancelForm}
             handleSubmit={handleSubmit}
+            submitting={submitting}
           />
         )}
       </Grid.Column>
