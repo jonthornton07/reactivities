@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Menu, Container, Button } from "semantic-ui-react";
+import ActivityStore, {
+  ActivityDashboardMode,
+} from "../../app/stores/activityStore";
+import { observer } from "mobx-react-lite";
 
-interface IProps {
-  createActivity: () => void;
-}
+const NavBar = () => {
+  const activityStore = useContext(ActivityStore);
 
-const NavBar: React.FC<IProps> = ({ createActivity }) => {
   return (
     <Menu fixed="top" inverted>
       <Container>
@@ -18,11 +20,17 @@ const NavBar: React.FC<IProps> = ({ createActivity }) => {
         </Menu.Item>
         <Menu.Item name="Activities" />
         <Menu.Item>
-          <Button onClick={createActivity} positive content="Create Activity" />
+          <Button
+            onClick={() =>
+              activityStore.setDashboardMode(ActivityDashboardMode.CREATE)
+            }
+            positive
+            content="Create Activity"
+          />
         </Menu.Item>
       </Container>
     </Menu>
   );
 };
 
-export default NavBar;
+export default observer(NavBar);

@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { IActivity } from "../models/activity";
 import NavBar from "../../features/nav/NavBar";
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
@@ -8,23 +8,15 @@ interface IState {
   activities: IActivity[];
 }
 
-function App() {
-  const [isCreatingActivity, setCreatingActivity] = useState(false);
-  const createActivity = () => {
-    setCreatingActivity(true);
-  };
-
+const App = () => {
   return (
     <Fragment>
-      <NavBar createActivity={createActivity} />
+      <NavBar />
       <Container style={{ marginTop: "7em" }}>
-        <ActivityDashboard
-          creatingActivity={isCreatingActivity}
-          activityCreationCancelled={() => setCreatingActivity(false)}
-        />
+        <ActivityDashboard />
       </Container>
     </Fragment>
   );
-}
+};
 
 export default App;
