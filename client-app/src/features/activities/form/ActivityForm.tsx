@@ -1,38 +1,62 @@
-import React, { useState, FormEvent, useContext } from "react";
+import React, { useEffect, useState, FormEvent, useContext } from "react";
 import { Segment, Form, Button } from "semantic-ui-react";
 import { IActivity } from "../../../app/models/activity";
-import ActivityStore, {
-  ActivityDashboardMode,
-} from "../../../app/stores/activityStore";
+import ActivityStore from "../../../app/stores/activityStore";
 import { observer } from "mobx-react-lite";
+import { RouteComponentProps } from "react-router-dom";
 
-const ActivityForm = () => {
+interface DetailParams {
+  id: string;
+}
+
+const ActivityForm: React.FC<RouteComponentProps<DetailParams>> = ({
+  match,
+  history,
+}) => {
   const activityStore = useContext(ActivityStore);
-  const { selectedActivity, submitting } = activityStore;
+  const {
+    activity: edittingActivity,
+    submitting,
+    clearActivity,
+    loadActivity,
+  } = activityStore;
 
-  const initForm = () => {
-    if (selectedActivity) {
-      return selectedActivity;
-    } else {
-      return {
-        id: "",
-        title: "",
-        description: "",
-        category: "",
-        date: "",
-        city: "",
-        venue: "",
-      };
+  const [activity, setActivity] = useState<IActivity>({
+    id: "",
+    title: "",
+    description: "",
+    category: "",
+    date: "",
+    city: "",
+    venue: "",
+  });
+
+  useEffect(() => {
+    if (match.params.id && activity.id.length === 0) {
+      loadActivity(match.params.id).then(
+        () => edittingActivity && setActivity(edittingActivity)
+      );
     }
-  };
-
-  const [activity, setActivity] = useState<IActivity>(initForm);
+    return () => {
+      clearActivity();
+    };
+  }, [
+    loadActivity,
+    match.params.id,
+    clearActivity,
+    edittingActivity,
+    activity,
+  ]);
 
   const submit = () => {
-    if (selectedActivity) {
-      activityStore.editActivity(activity);
+    if (match.params.id) {
+      activityStore
+        .editActivity(activity)
+        .then(() => history.push(`/activities/${activity.id}`));
     } else {
-      activityStore.createActivity(activity);
+      activityStore
+        .createActivity(activity)
+        .then(() => history.push(`/activities/${activity.id}`));
     }
   };
 
@@ -44,9 +68,9 @@ const ActivityForm = () => {
   };
 
   const handleCancelClicked = () => {
-    activityStore.setSelectedActivity(null);
-    activityStore.setDashboardMode(ActivityDashboardMode.NONE);
+    activityStore.setActivity(null);
     activityStore.setSubmittingActivity(false);
+    history.push("/activities");
   };
 
   return (

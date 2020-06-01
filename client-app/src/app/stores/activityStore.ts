@@ -4,20 +4,13 @@ import { createContext } from "react";
 import agent from "../api/agent";
 import { v4 as uuid } from "uuid";
 
-export enum ActivityDashboardMode {
-  NONE,
-  EDIT,
-  CREATE,
-}
-
 configure({ enforceActions: "always" });
 
 class ActivityStore {
   @observable activityRegistry = new Map();
-  @observable selectedActivity: IActivity | null = null;
+  @observable activity: IActivity | null = null;
   @observable deletingId: string | null = null;
   @observable loading = false;
-  @observable mode = ActivityDashboardMode.NONE;
   @observable submitting = false;
 
   @computed get activitiesByDate() {
@@ -30,7 +23,7 @@ class ActivityStore {
     this.loading = true;
     try {
       const activities = await agent.Activities.list();
-      runInAction("loading acitvities", () => {
+      runInAction("loading activity", () => {
         activities.forEach((activity) => {
           activity.date = activity.date.split(".")[0];
           this.activityRegistry.set(activity.id, activity);
@@ -39,25 +32,50 @@ class ActivityStore {
     } catch (error) {
       console.log(error);
     } finally {
-      runInAction("loading acitvities stop", () => {
+      runInAction("loading activity stop", () => {
         this.loading = false;
       });
     }
+  };
+
+  @action loadActivity = async (id: string) => {
+    let activity = this.getActivity(id);
+    if (activity) {
+      this.activity = activity;
+      return;
+    }
+    this.loading = true;
+    try {
+      const activity = await agent.Activities.details(id);
+      runInAction("loading activity", () => {
+        this.activity = activity;
+        this.loading = false;
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      runInAction("loading activity stop", () => {
+        this.loading = false;
+      });
+    }
+  };
+
+  getActivity = (id: string) => {
+    return this.activityRegistry.get(id);
   };
 
   @action editActivity = async (activity: IActivity) => {
     this.submitting = true;
     try {
       await agent.Activities.update(activity);
-      runInAction("edit acitvity success", () => {
+      runInAction("edit activity success", () => {
         this.activityRegistry.set(activity.id, activity);
-        this.selectedActivity = activity;
-        this.mode = ActivityDashboardMode.NONE;
+        this.activity = activity;
       });
     } catch (error) {
       console.log(error);
     } finally {
-      runInAction("edit acitvity finally", () => {
+      runInAction("edit activity finally", () => {
         this.submitting = false;
       });
     }
@@ -71,16 +89,15 @@ class ActivityStore {
     };
     try {
       await agent.Activities.create(newActivity);
-      runInAction("create acitvity success", () => {
-        this.selectedActivity = newActivity;
+      runInAction("create activity success", () => {
+        this.activity = newActivity;
         this.activityRegistry.set(newActivity.id, newActivity);
       });
     } catch (error) {
       console.log(error);
     } finally {
-      runInAction("create acitvity finally", () => {
+      runInAction("create activity finally", () => {
         this.submitting = false;
-        this.mode = ActivityDashboardMode.NONE;
       });
     }
   };
@@ -91,30 +108,26 @@ class ActivityStore {
       await agent.Activities.delete(activity.id);
       runInAction("delete acitvity success", () => {
         this.activityRegistry.delete(activity.id);
-        this.selectedActivity = null;
+        this.activity = null;
       });
     } catch (error) {
       console.log(error);
     } finally {
       runInAction("deleting activity finally", () => {
         this.deletingId = null;
-        this.mode = ActivityDashboardMode.NONE;
       });
     }
   };
 
-  @action setSelectedActivity = (activity: IActivity | null) => {
-    this.mode = ActivityDashboardMode.NONE;
-    this.selectedActivity = activity;
+  @action setActivity = (activity: IActivity | null) => {
+    this.activity = activity;
   };
 
   @action setSubmittingActivity = (editting: boolean) => {
     this.submitting = false;
   };
 
-  @action setDashboardMode = (mode: ActivityDashboardMode) => {
-    this.mode = mode;
-  };
+  @action clearActivity = () => (this.activity = null);
 }
 
 export default createContext(new ActivityStore());
