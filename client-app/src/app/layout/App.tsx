@@ -5,7 +5,7 @@ import { Container } from "semantic-ui-react";
 import { Route, withRouter, RouteComponentProps } from "react-router-dom";
 import HomePage from "../../features/activities/home/HomePage";
 import ActivityForm from "../../features/activities/form/ActivityForm";
-import ActivityDetails from "../../features/activities/dashboard/ActivityDetails";
+import ActivityDetails from "../../features/activities/details/ActivityDetails";
 import "mobx-react-lite/batchingForReactDom";
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {

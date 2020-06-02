@@ -21,7 +21,7 @@ const ActivityDashboard = () => {
         <ActivityList />
       </Grid.Column>
       <Grid.Column width={6}>
-        <h1>Activity Filters</h1>>
+        <h1>Activity Filters</h1>
       </Grid.Column>
     </Grid>
   );
