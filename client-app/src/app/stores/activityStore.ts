@@ -1,8 +1,10 @@
+import { toast } from "react-toastify";
 import { IActivity } from "./../models/activity";
 import { observable, action, computed, configure, runInAction } from "mobx";
 import { createContext } from "react";
 import agent from "../api/agent";
 import { v4 as uuid } from "uuid";
+import { history } from "../..";
 
 configure({ enforceActions: "always" });
 
@@ -57,7 +59,7 @@ class ActivityStore {
     let activity = this.getActivity(id);
     if (activity) {
       this.activity = activity;
-      return;
+      return activity;
     }
     this.loading = true;
     try {
@@ -65,8 +67,10 @@ class ActivityStore {
       runInAction("loading activity", () => {
         activity.date = new Date(activity.date);
         this.activity = activity;
+        this.activityRegistry.set(activity.id, activity);
         this.loading = false;
       });
+      return activity;
     } catch (error) {
       console.log(error);
     } finally {
@@ -88,8 +92,10 @@ class ActivityStore {
         this.activityRegistry.set(activity.id, activity);
         this.activity = activity;
       });
+      history.push(`/activities/${activity.id}`);
     } catch (error) {
-      console.log(error);
+      console.log(error.response);
+      toast.error("Problem submitting data");
     } finally {
       runInAction("edit activity finally", () => {
         this.submitting = false;
@@ -109,8 +115,10 @@ class ActivityStore {
         this.activity = newActivity;
         this.activityRegistry.set(newActivity.id, newActivity);
       });
+      history.push(`/activities/${newActivity.id}`);
     } catch (error) {
-      console.log(error);
+      console.log(error.response);
+      toast.error("Problem submitting data");
     } finally {
       runInAction("create activity finally", () => {
         this.submitting = false;
