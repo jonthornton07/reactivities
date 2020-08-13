@@ -1,14 +1,18 @@
 import { toast } from "react-toastify";
 import { IActivity } from "./../models/activity";
-import { observable, action, computed, configure, runInAction } from "mobx";
-import { createContext } from "react";
+import { observable, action, computed, runInAction } from "mobx";
 import agent from "../api/agent";
 import { v4 as uuid } from "uuid";
 import { history } from "../..";
+import { RootStore } from "./rootStore";
 
-configure({ enforceActions: "always" });
+export default class ActivityStore {
+  rootStore: RootStore;
 
-class ActivityStore {
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
+  }
+
   @observable activityRegistry = new Map();
   @observable activity: IActivity | null = null;
   @observable deletingId: string | null = null;
@@ -153,5 +157,3 @@ class ActivityStore {
 
   @action clearActivity = () => (this.activity = null);
 }
-
-export default createContext(new ActivityStore());
