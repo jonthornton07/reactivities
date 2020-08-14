@@ -41,5 +41,17 @@ namespace Application.Activities
             command.Id = id;
             return await Mediator.Send(command);
         }
+
+        [HttpPost("{id}/attend")]
+        public async Task<ActionResult<Unit>> Attend(Guid id)
+        {
+            return await Mediator.Send(new Attend.Command { Id = id });
+        }
+
+        [HttpDelete("{id}/unattend")]
+        public async Task<ActionResult<Unit>> Unattend(Guid id)
+        {
+            return await Mediator.Send(new Unattend.Command { Id = id });
+        }
     }
 }
