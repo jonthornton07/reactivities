@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect } from "react";
+import React, { Fragment, useContext, useEffect, useState } from "react";
 import NavBar from "../../features/nav/NavBar";
 import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
 import { Container } from "semantic-ui-react";
@@ -14,27 +14,30 @@ import ActivityDetails from "../../features/activities/details/ActivityDetails";
 import "mobx-react-lite/batchingForReactDom";
 import NotFound from "./NotFound";
 import { ToastContainer } from "react-toastify";
-import { LoginForm } from "../../features/user/LoginForm";
+import LoginForm from "../../features/user/LoginForm";
 import { RootStoreContext } from "../stores/rootStore";
 import { LoadingComponent } from "./LoadingComponent";
+import ModalContainer from "../../common/modals/ModalContainer";
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
   const rootStore = useContext(RootStoreContext);
-  const { appLoaded, setAppLoaded, token } = rootStore.commonStore;
+  const { token } = rootStore.commonStore;
   const { getUser } = rootStore.userStore;
+  const [appLoaded, setAppLoaded] = useState(false);
 
   useEffect(() => {
     if (token && !appLoaded) {
-      getUser().finally(() => setAppLoaded());
+      getUser().finally(() => setAppLoaded(true));
     } else {
-      setAppLoaded();
+      setAppLoaded(true);
     }
-  }, [getUser, setAppLoaded, token]);
+  }, [getUser, setAppLoaded, appLoaded, token]);
 
   if (!appLoaded) return <LoadingComponent content={"Loading App..."} />;
 
   return (
     <Fragment>
+      <ModalContainer />
       <ToastContainer position="bottom-right" />
       <Route exact path="/" component={HomePage} />
       <Route

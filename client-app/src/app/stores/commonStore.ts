@@ -10,7 +10,6 @@ export default class CommonStore {
     reaction(
       () => this.token,
       (token) => {
-        debugger;
         if (token) {
           window.localStorage.setItem("jwt", token);
         } else {
@@ -21,13 +20,8 @@ export default class CommonStore {
   }
 
   @observable token: string | null = window.localStorage.getItem("jwt");
-  @observable appLoaded = false;
 
   @action setToken = (token: string | null) => {
     this.token = token;
-  };
-
-  @action setAppLoaded = () => {
-    this.appLoaded = true;
   };
 }
