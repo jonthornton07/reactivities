@@ -1,11 +1,9 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using Domain;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using API.Controllers;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Activities
 {
@@ -13,13 +11,13 @@ namespace Application.Activities
     {
 
         [HttpGet]
-        public async Task<ActionResult<List<Activity>>> List()
+        public async Task<ActionResult<List<ActivityDto>>> List()
         {
             return await Mediator.Send(new List.Query());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Activity>> Details(Guid id)
+        public async Task<ActionResult<ActivityDto>> Details(Guid id)
         {
             return await Mediator.Send(new Details.Query { Id = id });
         }
