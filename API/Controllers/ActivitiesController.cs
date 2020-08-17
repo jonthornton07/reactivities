@@ -4,6 +4,7 @@ using MediatR;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using API.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Application.Activities
 {
@@ -29,6 +30,7 @@ namespace Application.Activities
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "IsActivityHost")]
         public async Task<ActionResult<Unit>> Edit(Guid id, Edit.Command command)
         {
             command.Id = id;
@@ -36,6 +38,7 @@ namespace Application.Activities
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "IsActivityHost")]
         public async Task<ActionResult<Unit>> Delete(Guid id, Delete.Command command)
         {
             command.Id = id;
