@@ -12,6 +12,7 @@ using Application.Interfaces;
 using Application.Errors;
 using System.Net;
 using Application.Validators;
+using System.Linq;
 
 namespace Application.User
 {
@@ -72,7 +73,7 @@ namespace Application.User
                         DisplayName = user.DisplayName,
                         Username = user.UserName,
                         Token = _jWTGenerator.CreateToken(user),
-                        Image = null
+                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
                     };
                 }
 
