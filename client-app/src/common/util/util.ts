@@ -1,5 +1,6 @@
 import { IUser } from "./../../app/models/user";
 import { IActivity, IAttendee } from "./../../app/models/activity";
+
 export const combineDateAndTime = (date: Date, time: Date) => {
   const timeString = time.getHours() + ":" + time.getMinutes() + ":00";
   const year = date.getFullYear();
