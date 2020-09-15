@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using System.Text;
 using Application.Activities;
 using Application.Interfaces;
+using Application.Profiles;
 using API.Middleware;
 using AutoMapper;
 using Domain;
@@ -103,6 +104,7 @@ namespace API
             services.AddScoped<IJWTGenerator, JWTGenerator>();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<IProfileReader, ProfileReader>();
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
         }
 
