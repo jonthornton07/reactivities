@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
-import { Button, Grid, Loader } from "semantic-ui-react";
+import { Grid, Loader } from "semantic-ui-react";
 import ActivityList from "./ActivityList";
 import { LoadingComponent } from "../../../app/layout/LoadingComponent";
 import { observer } from "mobx-react-lite";
@@ -29,7 +29,7 @@ const ActivityDashboard = () => {
     loadActivities();
   }, [loadActivities]);
 
-  if (loading && page == 0)
+  if (loading && page === 0)
     return <LoadingComponent content="Loading Activities..." />;
 
   return (
