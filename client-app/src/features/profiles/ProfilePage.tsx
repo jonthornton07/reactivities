@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import { Grid } from "semantic-ui-react";
-import ProfileHeader from "./Profileheader";
+import ProfileHeader from "./ProfileHeader";
 import ProfileContent from "./ProfileContent";
 import { RootStoreContext } from "../../app/stores/rootStore";
 import { RouteComponentProps } from "react-router-dom";
@@ -15,7 +15,16 @@ interface IProps extends RouteComponentProps<RouteParams> {}
 
 const ProfilePage: React.FC<IProps> = ({ match }) => {
   const rootStore = useContext(RootStoreContext);
-  const { loading, profile, loadProfile } = rootStore.profileStore;
+  const {
+    loading,
+    profile,
+    loadProfile,
+    follow,
+    unfollow,
+    isCurrentUser,
+    updatingFollow,
+    updateActiveTab,
+  } = rootStore.profileStore;
 
   useEffect(() => {
     loadProfile(match.params.username);
@@ -26,8 +35,14 @@ const ProfilePage: React.FC<IProps> = ({ match }) => {
   return (
     <Grid>
       <Grid.Column width={16}>
-        <ProfileHeader profile={profile!} />
-        <ProfileContent />
+        <ProfileHeader
+          profile={profile!}
+          isCurrentUser={isCurrentUser}
+          loading={updatingFollow}
+          follow={follow}
+          unfollow={unfollow}
+        />
+        <ProfileContent updateActiveTab={updateActiveTab} />
       </Grid.Column>
     </Grid>
   );

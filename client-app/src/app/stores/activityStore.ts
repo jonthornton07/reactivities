@@ -36,7 +36,9 @@ export default class ActivityStore {
 
     this.hubConnection.start().then(() => {
       if (this.hubConnection!.state === "Connected") {
-        this.hubConnection!.invoke("AddToGroup", activityId);
+        this.hubConnection!.invoke("AddToGroup", activityId).catch((error) =>
+          console.log(error)
+        );
       }
     });
 
@@ -48,9 +50,9 @@ export default class ActivityStore {
   };
 
   @action stopHubConnection = () => {
-    this.hubConnection!.invoke("RemoveFromGroup", this.activity!.id).then(() =>
-      this.hubConnection!.stop()
-    );
+    this.hubConnection!.invoke("RemoveFromGroup", this.activity!.id)
+      .then(() => this.hubConnection!.stop())
+      .catch((error) => console.log(error));
   };
 
   @computed get activitiesByDate() {

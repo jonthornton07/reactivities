@@ -37,7 +37,7 @@ namespace Application.Profiles
                 FollowingCount = user.Followings.Count()
             };
 
-            if (currentUser.Followings.Any(x => x.ObserverId == user.Id))
+            if (currentUser.Followings.Any(x => x.TargetId == user.Id))
             {
                 profile.IsFollowed = true;
             }
