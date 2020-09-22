@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build": "dotnet publish -c Release -o publish --self-contained false Reactivities.sln"
+  },
   "dependencies": {
     "@types/react-infinite-scroller": "^1.2.1",
     "react-infinite-scroller": "^1.2.4"

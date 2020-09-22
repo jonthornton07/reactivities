@@ -17,6 +17,7 @@ appsettings.json
 # production
 */build
 wwwroot
+publish
 
 # misc
 .DS_Store
