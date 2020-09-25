@@ -65,17 +65,13 @@ namespace Application.User
                     Email = request.Email
                 };
 
+                var refreshToken = _jWTGenerator.GenerateRefreshToken();
+                user.RefreshTokens.Add(refreshToken);
                 var result = await _userManager.CreateAsync(user, request.Password);
+
                 if (result.Succeeded)
                 {
-                    return new User
-                    {
-                        DisplayName = user.DisplayName,
-                        Username = user.UserName,
-                        Token = _jWTGenerator.CreateToken(user),
-                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
-                        Bio = user.Bio
-                    };
+                    return new User(user, _jWTGenerator, refreshToken.Token);
                 }
 
                 throw new Exception("Problem Creating User");

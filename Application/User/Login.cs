@@ -51,14 +51,11 @@ namespace Application.User
 
                 if (result.Succeeded)
                 {
-                    return new User
-                    {
-                        DisplayName = user.DisplayName,
-                        Token = _jWTGenerator.CreateToken(user),
-                        Username = user.UserName,
-                        Image = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
-                        Bio = user.Bio
-                    };
+                    var refreshToken = _jWTGenerator.GenerateRefreshToken();
+                    user.RefreshTokens.Add(refreshToken);
+                    await _userManager.UpdateAsync(user);
+
+                    return new User(user, _jWTGenerator, refreshToken.Token);
                 }
 
                 throw new RestException(HttpStatusCode.Unauthorized);
