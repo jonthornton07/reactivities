@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,5 +12,10 @@ namespace Domain
         public virtual ICollection<Photo> Photos { get; set; }
         public virtual ICollection<UserFollowing> Followings { get; set; }
         public virtual ICollection<UserFollowing> Followers { get; set; }
+
+        public AppUser()
+        {
+            Photos = new Collection<Photo>();
+        }
     }
 }
