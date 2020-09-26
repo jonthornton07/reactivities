@@ -47,6 +47,9 @@ namespace Application.User
                 if (null == user)
                     throw new RestException(HttpStatusCode.Unauthorized);
 
+                if (!user.EmailConfirmed)
+                    throw new RestException(HttpStatusCode.BadRequest, new { Email = "Email not verified" });
+
                 var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
 
                 if (result.Succeeded)

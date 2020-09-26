@@ -86,6 +86,10 @@ const User = {
   fbLogin: (accessToken: string): Promise<IUser> =>
     requests.post("/user/facebook", { accessToken }),
   refreshToken: (): Promise<IUser> => requests.post(`/user/refreshToken`, {}),
+  verifyEmail: (token: string, email: string): Promise<void> =>
+    requests.post(`/user/verifyEmail`, { token, email }),
+  resendVerificationEmail: (email: string): Promise<void> =>
+    requests.get(`/user/resendEmailVerification?email=${email}`),
 };
 
 const Profiles = {

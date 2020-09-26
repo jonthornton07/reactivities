@@ -1,4 +1,3 @@
-
 using MediatR;
 using Persistence;
 using System;
@@ -12,18 +11,20 @@ using Application.Interfaces;
 using Application.Errors;
 using System.Net;
 using Application.Validators;
-using System.Linq;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace Application.User
 {
     public class Register
     {
-        public class Command : IRequest<User>
+        public class Command : IRequest
         {
             public string DisplayName { get; set; }
             public string UserName { get; set; }
             public string Email { get; set; }
             public string Password { get; set; }
+            public string Origin { get; set; }
         }
 
         public class CommandValidator : AbstractValidator<Command>
@@ -37,20 +38,20 @@ namespace Application.User
             }
         }
 
-        public class Handler : IRequestHandler<Command, User>
+        public class Handler : IRequestHandler<Command>
         {
             private readonly DataContext _context;
             private readonly UserManager<AppUser> _userManager;
-            private readonly IJWTGenerator _jWTGenerator;
+            private readonly IEmailSender _emailSender;
 
-            public Handler(DataContext context, UserManager<AppUser> userManager, IJWTGenerator jWTGenerator)
+            public Handler(DataContext context, UserManager<AppUser> userManager, IEmailSender emailSender)
             {
                 _context = context;
                 _userManager = userManager;
-                _jWTGenerator = jWTGenerator;
+                _emailSender = emailSender;
             }
 
-            public async Task<User> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
                 if (await _context.Users.AnyAsync(x => x.Email == request.Email))
                     throw new RestException(HttpStatusCode.BadRequest, new { Email = "Email already exists" });
@@ -65,16 +66,19 @@ namespace Application.User
                     Email = request.Email
                 };
 
-                var refreshToken = _jWTGenerator.GenerateRefreshToken();
-                user.RefreshTokens.Add(refreshToken);
                 var result = await _userManager.CreateAsync(user, request.Password);
 
-                if (result.Succeeded)
-                {
-                    return new User(user, _jWTGenerator, refreshToken.Token);
-                }
+                if (!result.Succeeded)
+                    throw new Exception("Problem Creating User");
 
-                throw new Exception("Problem Creating User");
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+                var verifyUrl = $"{request.Origin}/user/verifyEmail?token={token}&email={request.Email}";
+                var message = $"<p>Please click the below link to verify your email address:</p><p><a href='{verifyUrl}'>{verifyUrl}></a></p>";
+                await _emailSender.SendEmailAsync(request.Email, "Please verify email address", message);
+
+                return Unit.Value;
             }
         }
     }
